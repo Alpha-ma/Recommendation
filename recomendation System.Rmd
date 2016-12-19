@@ -1,0 +1,126 @@
+---
+title: "Recommendation System Draft"
+author: Pegasus
+output: 
+  html_document: 
+    highlight: pygments
+    theme: cerulean
+---
+Recommendation system is a win-win strategy. We got a higher profit and customer get the goods they need.
+Recommender systems as a specific type of information filtering (IF) technique that attempts to present information items( makeup) that are likely of interest to the users.
+There are three 
+ + Personalized recommendation ¨C recommend things based on the individual¡¯s past behavior
+ + Social recommendation ¨C recommend things based on the past behavior of similar users
+ + Item recommendation ¨C recommend things based on the item itself
+ + A combination of the three approaches above
+ 
+ Key Information: browsing History, purchase history, and products information,location information, date.
+
+Almost all the recommender has three parts: foreground display interface, background log system(database) and recommendation algorithms system.
+
+#### display interface:
++ recommendation'results' title, thumbnail,and other content
++ average rating
++ reason for recommendation
+
+### 1. Recommendation for normal customers
+  + 1. method: Collaborative Filter
+  + clustering : k-means
+  + indexes used: user_id; rating or (num of each product bought by every customers) or other...; prodcuts_id; a history of every customers
+  + description: collaborative filter is a way to use people's rating for recommendation, i.e., we make use of the masses' intellegence. And the filter has the capability of self-learning.
+
+
+  + 2. method: content filter
+  + 
+  + description: content filter is to recommend depending on similiarty of products
+  
+## Make use of customers' behavior data
+customer behavior data
+customer behaviors : explicit feedback and immplict feedback
+explicit feedback: include clear customers' tastes: rating sytems: like/dislike five star rating
+explicit feedback: classic implicit feedback behavior: browsing behavior.
+
+PS: period for stay could be a explict feedback customer behviors
+
+  info|explict feedback| implicit feedback
+------|----------------|------------
+users' tastes| clear   | not clear
+scale | small         | large
+feedback type| both | only positive
+
+Customers' behavior general expression (index)
+user_id
+item_id
+behavior type : buy or just browse
+context: time, location should be included
+behavior weight:
+behavior content: label, rating, etc.
+
+### Analysis for data behavior
+
+#### Collaborative Filtering
+
++ neighborhood-based method
++ latent factor model
++ random walk on graph
+
+##### neighborhood-based method
++ user-based collabrative filtering method(UCF)
++ item-based collabrative filtering method(ICF)
+
+######  user-based collaborative filtering
+Drawbacks: the more users the more complicated it is, i.e., time consuming and space consuming sharply. 
+###### item-based collaborative filtering 
++ step 1: calculate similarity between items
++ step 2: according to similarity and behavior history, RS generate recommendation list for user.
+key point is how to measure similarity, the following is a popular similarity:
+$$\omega_{ij} = \frac{|N(i)\cap N(j)|}{\sqrt{|N(i)||N(j)|}} $$
+Where $|N(i)|$ is the number of users who like item i.
+
+
+Drawbacks of CF: hot sales have high similarity.
+
+## Latent Factor model (LFM)
+
+LFM measure user u's interest to item i:
+$$ Preference(\mu,i) = r_{\mu i} = p_{u}^T q_i = \sum_{f = 1}^{F} p_{u,k}q_{i,k}$$
+Where $p_{u,k}$ measure the relation between user u's interest and kth latent class, and $q_{i,k}$ measure teh relation between kth latent class and item i. LFM work well on explicit feedback data. to implicit data, we should generate negative samples for every users. 
+Negative samples should 1: have a similar size with positive examples; 2: to choose  hot sales that customers didn't show interest.
+
+After samples, we could get a user-item set $K = \{(\mu,\nu)\}$, if $(\mu,i)$ is positive, then $_{\mu i} = 1$, else $r_{\mu i} = 0$. After this, we should optimize the following equation to get proper p and q:
+$$C = \sum_{(\mu,i)\in K}\bigg(r_{\mu i} - \sum_{k =1}^{K}p_{\mu,k}q_{i,k}\bigg)^2 + \lambda(||p_{\mu}||^2 +||q_i||^2) $$
+where $\lambda(||p_{\mu}||^2 +||q_i||^2) $ is used to avoid overfitting, $\lambda$ could get by experiment.
+
+LFM hardly give recommendation constantly.
+
+### Graph-based 
+
+
+
+
+
+
+
+
+
+
+## Recommendation for the new
+  + method: sorting algorithm
+  + indexes used: volume of every prodcuts
+  
+
+# RS test
+
+## 1 off-line experiment
+
+## 2 user study
+
+## 3 online experiment
+
+ABtest
+
+estimate index
+
++ consumer satisfication degree
++ predicted accuracy
++ 
