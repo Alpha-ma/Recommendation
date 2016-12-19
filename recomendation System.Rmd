@@ -1,27 +1,174 @@
 ---
 title: "Recommendation System Draft"
-author: Pegasus
-output: 
-  html_document: 
+author: "Pegasus"
+output:
+  html_document:
     highlight: pygments
+    number_sections: yes
     theme: cerulean
+    toc: yes
+  pdf_document:
+    latex_engine: xelatex
 ---
-Recommendation system is a win-win strategy. We got a higher profit and customer get the goods they need.
-Recommender systems as a specific type of information filtering (IF) technique that attempts to present information items( makeup) that are likely of interest to the users.
-There are three 
- + Personalized recommendation ¨C recommend things based on the individual¡¯s past behavior
- + Social recommendation ¨C recommend things based on the past behavior of similar users
- + Item recommendation ¨C recommend things based on the item itself
- + A combination of the three approaches above
+# Introduction 
+## Definition:
+Recommender Systems (RSs) are software  tools and techniques that provide users with suggestions for items that a user may wish to utilize.
+
+## Purpose:
+The purpose of RSs is to **assist** consumers to find what they indeed want easily.
+
+## Functions: 
+From where we stand, RS should have mainly the following fucntions:
+
+(@) Increase the number of items sold
+(@) Sell more diverse items
+(@) Increase the users' satisfication
+(@) Increase user fidelity
+(@) Better understanding of what the user wants.
+
+
+## Image:
+The image of our RS should be build as **trustworthiness**. At begining, attention is should be taken into consideration. But in the long run, trustworthiness is the key point.  RS's image is to convince users to buy items. 
+The are some rules for building RS:
+
++ Matthew Effect: the strong will be stronger.
++ Long tail theory: unpopular items together will have a big weight maybe even bigger than the top N popular items. 
+
+## Constructure:
+A Recommender system should have the following parts:
+
+1. a complete index system:
+2. a diversified recommendation algorithm system:
+3. an effective test system
+4. a specific feedback sytem
+
+Also, RSs can be seen as the proceeding three parts: 
+
+1. foreground display interface
+    + place to displace
+    + recommendation'results' title, thumbnail,and other content
+    + average rating
+    + reason for recommendation
+2. background log system(database) 
+3. recommendation algorithm system.
+
+### Index System
+
+RS is an information processing sytems that actively gather various kinds of data.But any data required can be sorted into three kinds of objects: **items**, **users** and **transaction**. as different techniques need different data input, To build a complete and canonical index system is second to none  for starting to build a RS.
+
+1. **Items**:  Items are the objects that are waiting to be recommended.
+
+    + genre (brand, function,step): 
+    + SKU
+    + price
+    + volume
+    + (price / volume)
+    + *consumption rate
+    + sales volume
+    + *components
+    + trend
+2. **Users**: Users of an RS may have very diverse goals and characteristics.
+
+    + User_id
+    + location
+    + *age
+    + profession
+    + education
+
+3. **Transaction**: We generically referto a transanction as a recoreded interaction between a user and the RS.
+
+    + order
+    + rating
+    + context: time( day, week, month,season)
+    + comment
+    + log-like data
+
+Making a complete and canonical index system is the first step to build a recommender system, which decides its most important position. we should  take this part seriously.
+
+### Recommendation Algorithm System
+A RS must **predict** that an item is worth recommending. In order to do this, the system must be able to predict sthe utility of some itemws, or at least compare the utility of some items. and then decider which items to recommend based on this comparison.The prediction step may not be explicit in the recommendation algorithm but we can still apply this unifying model to describe the general role of an RS. 
+Recommender System's core function is to predict which item(s) worthwell to recommend for target user(s).And this is directly determined by the algorithm System. The core of the RS is it's algorithms, and the core of the algorithms is the **similarity**. There is a implicit assumption that the items users utilize is the most useful, and the more similarity of another item(s) with them, the more useful the item(s) is(are). All the algorithms are created around the attribute. And differet ways to measure similarity generate different algorithms: 
+
+There are four way to make recommendation engines(REs):
+
+     + Personalized recommendation â€“ recommend things based on the individualâ€™s past behavior
+     + Social recommendation â€“ recommend things based on the past behavior of similar users
+     + Item recommendation â€“ recommend things based on the item itself
+     + A combination of the three approaches above
+ according different way of making REs, we have the following classes of recommendation algorithms:
  
- Key Information: browsing History, purchase history, and products information,location information, date.
+ 1. **Content-based**: The engines learns to recommend items that are similar to the ones that the user liked in the past. The similarity of items is calculated based on the features associated with the compared items. The items' attributes are simply keywords that are extracted from the items' descriptions. Semantic indexing techniques represent the item and user profiles using concepts intead of keywords.
 
-Almost all the recommender has three parts: foreground display interface, background log system(database) and recommendation algorithms system.
+2. **Collaborative Filtering(CF)** as its name indicates,collaborative filtering could filter users' uniterested items then recommend a recommendation list via constantly interactive of all users. There are three main branches of CF
 
-#### display interface:
-+ recommendation'results' title, thumbnail,and other content
-+ average rating
-+ reason for recommendation
+    + neighborhood-based method
+        + user-based collabrative filtering method(UCF)
+        + item-based collabrative filtering method(ICF)
+    + latent factor model
+    + random walk on graph
+
+3. **Demographic** this type of engines recommends items based on the demographic profile of the user.
+
+4. **Knowledge-Based** Knowledge-based systems recommend items based on specific domain knowledge about how certain item features meet users' needs and preferences and, ultimately, how the item is useful for the user.
+
+    + Case-based
+    + Constrained-based: both systems are similar,user requirements are collected, repairs for inconsistent requirements are automatically proposed in situations wherer no solution could be found. The major difference lies in the way solutions are calculated. case-based recommenders determine recommendations on the basis of similarity metrics whereas constraint-based recommenders predominantly exploit predefined knowledge bases taht contain explicit rules about how to relate customer requirements with item features.
+    + Community-based: based on the preferences of the user's friends. Evidence suggests that people tend to rely more on recommendation from their friends than on recommendations from similar but anonymous individuals.    
+5. **Hybrid Recommender Systems** the combination fo the above mentioned techniques.
+
+## Recommender System Evaluation: 
+The necessity of evaluating the quality and value of the systems is undoubt, Evaluation is required at different stages of the system's life cycle and for various purposes.
+1. off-line experiment
+
+2. user study(survey)
+
+3. online experiment(A/B test)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ### 1. Recommendation for normal customers
   + 1. method: Collaborative Filter
@@ -60,13 +207,10 @@ behavior content: label, rating, etc.
 
 #### Collaborative Filtering
 
-+ neighborhood-based method
-+ latent factor model
-+ random walk on graph
+
 
 ##### neighborhood-based method
-+ user-based collabrative filtering method(UCF)
-+ item-based collabrative filtering method(ICF)
+
 
 ######  user-based collaborative filtering
 Drawbacks: the more users the more complicated it is, i.e., time consuming and space consuming sharply. 
