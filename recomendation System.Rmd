@@ -91,10 +91,10 @@ Recommender System's core function is to predict which item(s) worthwell to reco
 
 There are four way to make recommendation engines(REs):
 
-     + Personalized recommendation â€“ recommend things based on the individualâ€™s past behavior
-     + Social recommendation â€“ recommend things based on the past behavior of similar users
-     + Item recommendation â€“ recommend things based on the item itself
-     + A combination of the three approaches above
+   + Personalized recommendation â€? recommend things based on the individualâ€™s past behavior
+   + Social recommendation â€? recommend things based on the past behavior of similar users
+   + Item recommendation â€? recommend things based on the item itself
+   + A combination of the three approaches above
  according different way of making REs, we have the following classes of recommendation algorithms:
  
  1. **Content-based**: The engines learns to recommend items that are similar to the ones that the user liked in the past. The similarity of items is calculated based on the features associated with the compared items. The items' attributes are simply keywords that are extracted from the items' descriptions. Semantic indexing techniques represent the item and user profiles using concepts intead of keywords.
@@ -125,22 +125,162 @@ The necessity of evaluating the quality and value of the systems is undoubt, Eva
 3. online experiment(A/B test)
 
 
+# Make use of users' behavior data (collaborative filtering)
 
+Users' behavior can be divided into two branches: explicit feedback and implicit feedback. 
 
+explicit feedback: include clear customers' tastes: rating sytems: like/dislike five star rating
+explicit feedback: classic implicit feedback behavior: browsing behavior.
 
+PS: period for stay could be a explict feedback customer behviors
 
+  info|explict feedback| implicit feedback
+------|----------------|------------
+users' tastes| clear   | not clear
+scale | small         | large
+feedback type| both | only positive
 
+## evaluation indicator
 
+Recommend N items for user u ,(R(u)), and T(u) denotes user u's interested list in training samples. Then Recall and precision:
 
+$$ Recall = \frac{\sum_{\mu}|R(\mu)\cap T(\mu)|}{\sum_{\mu}|T(\mu)|}$$
 
+$$Precision = \frac{\sum_{\mu}|R(\mu)\cap T(\mu)|}{\sum_{\mu}|R(\mu)|}$$
 
+Recall shows the ratio of user-itmes records of training samples are including in the final recommendation list, on the other hand, Precision portrays the ratio of user-item records in  the final recommendation list.
+```{python eval = TRUE}
+# train and test should be dicts: {users:item_ids}
+def RecallandPrecision(train,test,N):
+    hit = 0
+    T = 0
+    R = 0
+    for user in train.keys():
+        tu = test[user]
+        rank = GetRecommendation(user,N)
+        for item, pui in rank:
+            if item in tu:
+                hit += 1
+        T +=len(tu)
+        R += N
+    recall = hit/(T * 1.0)
+    precision = hit/(R * 1.0)
+    return recall,precision
+```
+Where `getrecommendation(user,N)` is the recommendation list of user u. 
+There is another rate coverage to tell us how many long tail items are recommended to users, i.e., how much range our recommendation engine will cover.
 
+$$Coverage = \frac{|\cup_{\mu\in U}R(\mu)|}{|I|}$$
+```{python eval =TRUE}
+def Coverage(train, test, N):  
+    recommend_items = set()  
+    all_items = set()  
+    for user in train.keys():   
+        for item in train[user].keys():
+            all_items.add(item)   
+        rank = GetRecommendation(user, N)   
+        for item, pui in rank:  
+            recommend_items.add(item)  
+    return len(recommend_items) / (len(all_items) * 1.0) 
+```
+finally, we use average popularity of items in recommendation list to measure **Novelty**.
+```{python eval = TRUE}
+import math
+def Popularity(train, test, N):  
+    item_popularity = dict()  
+    for user, items in train.items():
+        for item in items.keys():   
+            if item not in item_popularity:   
+                item_popularity[item] = 0   
+            item_popularity[item] += 1 
+    ret = 0  
+    n = 0 
+    for user in train.keys(): 
+        rank = GetRecommendation(user, N) 
+        for item, pui in rank:  
+            ret += math.log(1 + item_popularity[item])
+            n += 1  
+    ret /= n * 1.0 
+    return ret
+```
+code above we use `log` for the reason that popularity will be more stable as popularity follows power law distribution (long tail distribution) whose graphs will be a lin under `log`.
+```{python eval =TRUE}
+def RecentPopularity(records, alpha, T):
+    ret = dict()  
+    for user,item,tm in records:   
+        if tm >= T:   
+            continue   
+        addToDict(ret, item, 1 / (1.0 + alpha * (T - tm)))
+    return ret
+```
 
+### Neighbor-based algorithms
+Neighbor-based algorithms are the most basic algorithms,still widely used across the commercial companies. this type of algorithms mainly has two branches: user-based CF and item-based CF.
+#### user-based collaborative filtering
++ step 1: find out  user set in which users have similar interests with target user.
++ step 2: recommend items that people in the set like but is not known by target user.
+the key point is how to measure similarity, the method we choose is to use consine similarity:
+$$\omega_{\mu\nu}=\frac{|N(\mu)\cap N(\nu)|}{\sqrt{|N(\mu)||N(\nu)|}} $$
+If we take time into consideration, we could use a decay fucntion: $ f(|t_{\mu i}-t_{\nu j}|)$, the preceeding formula we choose
+$$ f(|t_{\mu i}-t_{\nu j}|)=\frac{1}{1+\alpha|t_{\mu i}-t_{\nu i}|}$$
+Where $\alpha$ is a time decay factor.
 
+$$\omega_{\mu\nu} = \frac{\sum_{i\in N(\mu)\cap N(\nu)} \frac{1}{1+\alpha|t_{\mu i}-t_{\nu i}|}}{\sqrt{|N(\mu)|\cup|N(\nu)|}}$$
+The longer time between user u and user v show behavior to item i, the smaller similarity is between them.
+```{python eval = TRUE}
+def UserSimilarity(train):  
+    # build inverse table for item_users  
+    item_users = dict()  
+    for u, items in train.items():   
+        for i,tui in items.items():    
+            if i not in item_users:    
+                item_users[i] = dict()    
+            item_users[i][u] = tui 
+    #calculate co-rated items between users  
+    C = dict()  
+    N = dict()  
+    for i, users in item_users.items():   
+        for u,tui in users.items():    
+            N[u] += 1    
+            for v,tvi in users.items():    
+                if u == v:      
+                    continue    
+                C[u][v] += 1 / (1 + alpha * abs(tui - tvi))   
+    #calculate finial similarity matrix W  
+    W = dict()  
+    for u, related_users in C.items():  
+        for v, cuv in related_users.items():    
+            W[u][v] = cuv / math.sqrt(N[u] * N[v]) 
+    return W 
 
+```
+then we predict user u's interest to item i by using the following formula:
+$$p(\mu,i) = \sum_{\nu\in S(\mu,K)}\omega_{\mu\nu}r_{\nu i}\frac{1}{1 + \alpha(t_0 - t_{\nu i})} $$
+where $S(\mu,K)$ contains k users who have the most close similarity with user u, if user v has behavior on item i then $r_{\nu i} = 1$, otherwise,  $r_{\nu i} = 0$.
+```{python eval =TRUE}
+def Recommend(user, T, train, W):
+    rank = dict()  
+    interacted_items = train[user]  
+    for v, wuv in sorted(W[u].items, key=itemgetter(1),reverse=True)[0:K]:
+        for i, tvi in train[v].items:
+            if i in interacted_items:
+            #we should filter items user interacted before
+                continue    
+            rank[i] += wuv / (1 + alpha * (T - tvi))  
+    return rank
+```
 
+###### item-based collaborative filtering 
++ step 1: calculate similarity between items
++ step 2: according to similarity and behavior history, RS generate recommendation list for user.
+key point is how to measure similarity, the following is a popular similarity:
+$$\omega_{ij} = \frac{|N(i)\cap N(j)|}{\sqrt{|N(i)||N(j)|}} $$
 
+Where $|N(i)|$ is the number of users who like item i.
+if take time into consideration:
+$$\omega_{ij} = \frac{\sum_{\mu\in{N(i)\cap N(j)}}\frac{1}{1+\alpha|t_{\mu i - t_{\mu j}}|}}{\sqrt{|N(i)||N(j)|}}$$
 
+Drawbacks of CF: hot sales have high similarity.
 
 
 
@@ -181,19 +321,6 @@ The necessity of evaluating the quality and value of the systems is undoubt, Eva
   + 
   + description: content filter is to recommend depending on similiarty of products
   
-## Make use of customers' behavior data
-customer behavior data
-customer behaviors : explicit feedback and immplict feedback
-explicit feedback: include clear customers' tastes: rating sytems: like/dislike five star rating
-explicit feedback: classic implicit feedback behavior: browsing behavior.
-
-PS: period for stay could be a explict feedback customer behviors
-
-  info|explict feedback| implicit feedback
-------|----------------|------------
-users' tastes| clear   | not clear
-scale | small         | large
-feedback type| both | only positive
 
 Customers' behavior general expression (index)
 user_id
@@ -214,15 +341,7 @@ behavior content: label, rating, etc.
 
 ######  user-based collaborative filtering
 Drawbacks: the more users the more complicated it is, i.e., time consuming and space consuming sharply. 
-###### item-based collaborative filtering 
-+ step 1: calculate similarity between items
-+ step 2: according to similarity and behavior history, RS generate recommendation list for user.
-key point is how to measure similarity, the following is a popular similarity:
-$$\omega_{ij} = \frac{|N(i)\cap N(j)|}{\sqrt{|N(i)||N(j)|}} $$
-Where $|N(i)|$ is the number of users who like item i.
 
-
-Drawbacks of CF: hot sales have high similarity.
 
 ## Latent Factor model (LFM)
 
